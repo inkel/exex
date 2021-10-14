@@ -193,3 +193,33 @@ func BenchmarkRunCommand(b *testing.B) {
 
 	Stderr = exErr.Stderr
 }
+
+func TestCmd_Run(t *testing.T) {
+	t.Run("capture", func(t *testing.T) {
+		err := exex.Command(os.Args[0], "capture", "stderr").Run()
+		assertErr(t, err, "error: capture stderr")
+	})
+
+	t.Run("custom stderr", func(t *testing.T) {
+		var stderr bytes.Buffer
+		cmd := exex.Command(os.Args[0], "capture", "stderr")
+		cmd.Stderr = &stderr
+		err := cmd.Run()
+		if err == nil {
+			t.Fatal("expecting error")
+		}
+
+		exErr, ok := err.(*exec.ExitError)
+		if !ok {
+			t.Fatalf("expecting *exec.ExitError, got %T", err)
+		}
+		if exErr.Stderr != nil {
+			t.Errorf("expecting not captured stderr, got %q", exErr.Stderr)
+		}
+
+		exp := "error: capture stderr"
+		if got := stderr.String(); got != exp {
+			t.Errorf("expecting %q, got %q", exp, got)
+		}
+	})
+}
