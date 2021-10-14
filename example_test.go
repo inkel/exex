@@ -10,7 +10,7 @@ import (
 )
 
 func ExampleCommand() {
-	cmd := exex.Command("true")
+	cmd := exex.Command("sh", "-c", "foo")
 	err := cmd.Run()
 
 	var exErr *exec.ExitError
@@ -22,7 +22,7 @@ func ExampleCommand() {
 }
 
 func ExampleCommandContext() {
-	cmd := exex.Command("true")
+	cmd := exex.Command("sh", "-c", "foo")
 	err := cmd.Run()
 
 	var exErr *exec.ExitError
@@ -34,7 +34,7 @@ func ExampleCommandContext() {
 }
 
 func ExampleCmd_Run() {
-	err := exex.Command("foo").Run()
+	err := exex.Command("sh", "-c", "foo").Run()
 
 	var exErr *exec.ExitError
 	if errors.As(err, &exErr) {
@@ -45,7 +45,7 @@ func ExampleCmd_Run() {
 }
 
 func ExampleRun() {
-	err := exex.Run("foo")
+	err := exex.Run("sh", "-c", "foo")
 
 	var exErr *exec.ExitError
 	if errors.As(err, &exErr) {
@@ -57,7 +57,7 @@ func ExampleRun() {
 
 func ExampleRunContext() {
 	ctx := context.Background()
-	err := exex.RunContext(ctx, "foo")
+	err := exex.RunContext(ctx, "sh", "-c", "foo")
 
 	var exErr *exec.ExitError
 	if errors.As(err, &exErr) {
@@ -68,7 +68,7 @@ func ExampleRunContext() {
 }
 
 func ExampleRunCommand() {
-	cmd := exec.Command("foo")
+	cmd := exec.Command("sh", "-c", "foo")
 	err := exex.RunCommand(cmd)
 
 	var exErr *exec.ExitError
