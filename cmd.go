@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os/exec"
 )
 
@@ -29,6 +30,10 @@ import (
 //
 // As in the case of exec.Cmd, a Cmd cannot be reused after executed
 // for the first time.
+//
+// Refer to the exec.Cmd documentation for information on all the
+// functions this type provides except for Run, which is overwritten
+// by this struct.
 type Cmd exec.Cmd
 
 // Command returns the Cmd struct to execute the named program with
@@ -77,6 +82,54 @@ func (c *Cmd) Run() error {
 
 	return err
 }
+
+// Start starts the specified command but does not wait for it to
+// complete.
+func (c *Cmd) Start() error {
+	if c.Stderr == nil {
+		c.Stderr = bytes.NewBuffer(make([]byte, 0, 1024))
+	}
+	return (*exec.Cmd)(c).Start()
+}
+
+// Wait waits for the command to exit and waits for any copying to
+// stdin or copying from stdout or stderr to complete.
+func (c *Cmd) Wait() error {
+	err := (*exec.Cmd)(c).Wait()
+
+	var exErr *exec.ExitError
+
+	if stderr, ok := c.Stderr.(*bytes.Buffer); ok && errors.As(err, &exErr) {
+		exErr.Stderr = stderr.Bytes()
+		return exErr
+	}
+
+	return err
+}
+
+// Output runs the command and returns its standard output. Any
+// returned error will usually be of type *ExitError. If c.Stderr was
+// nil, Output populates ExitError.Stderr.
+func (c *Cmd) Output() ([]byte, error) { return (*exec.Cmd)(c).Output() }
+
+// CombinedOutput runs the command and returns its combined standard
+// output and standard error.
+func (c *Cmd) CombinedOutput() ([]byte, error) { return (*exec.Cmd)(c).CombinedOutput() }
+
+// StderrPipe returns a pipe that will be connected to the command's
+// standard error when the command starts.
+func (c *Cmd) StderrPipe() (io.ReadCloser, error) { return (*exec.Cmd)(c).StderrPipe() }
+
+// StdinPipe returns a pipe that will be connected to the command's
+// standard input when the command starts.
+func (c *Cmd) StdinPipe() (io.WriteCloser, error) { return (*exec.Cmd)(c).StdinPipe() }
+
+// StdoutPipe returns a pipe that will be connected to the command's
+// standard output when the command starts.
+func (c *Cmd) StdoutPipe() (io.ReadCloser, error) { return (*exec.Cmd)(c).StdoutPipe() }
+
+// String returns a human-readable description of c
+func (c *Cmd) String() string { return (*exec.Cmd)(c).String() }
 
 // RunCommand wraps an *exec.Cmd into a Cmd and returns the result of
 // calling *Cmd.Run.
