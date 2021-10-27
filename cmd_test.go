@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"testing"
 
 	"github.com/inkel/exex"
@@ -222,4 +223,35 @@ func TestCmd_Run(t *testing.T) {
 			t.Errorf("expecting %q, got %q", exp, got)
 		}
 	})
+}
+
+func TestLookPathNotFound(t *testing.T) {
+	nonExistingPath := "foobarbazquux"
+
+	path, err := exex.LookPath(nonExistingPath)
+	if err == nil {
+		t.Fatalf("LookPath found %q in $PATH: %v", nonExistingPath, path)
+	}
+	if path != "" {
+		t.Fatalf("LookPath returned %q with a non-nil error: %v", path, err)
+	}
+
+	if _, ok := err.(*exex.Error); !ok {
+		t.Fatal("LookPath error is not an exex.Error")
+	}
+	if _, ok := err.(*exec.Error); !ok {
+		t.Fatal("LookPath error is not an exex.Error")
+	}
+}
+
+func TestLookPathFound(t *testing.T) {
+	bin := os.Args[0]
+	os.Setenv("PATH", path.Dir(bin))
+	path, err := exex.LookPath(path.Base(bin))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if path != bin {
+		t.Fatalf("expecting %q, got %q", bin, path)
+	}
 }

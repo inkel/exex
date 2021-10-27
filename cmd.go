@@ -16,6 +16,10 @@
 // capturing STDOUT, and also STDERR will be truncated. The wrappers
 // defined in this library do not have this peformance penalization
 // nor truncate any output.
+//
+// In order to avoid importing both this package and os/exec, this
+// package provides aliases for the variables and top-level functions
+// os/exec provides.
 package exex
 
 import (
@@ -147,3 +151,18 @@ func Run(cmd string, args ...string) error {
 func RunContext(ctx context.Context, cmd string, args ...string) error {
 	return CommandContext(ctx, cmd, args...).Run()
 }
+
+// Error is a type alias for exec.Error
+type Error = exec.Error
+
+// ExitError is a type alias for exec.ExitError
+type ExitError = exec.ExitError
+
+// ErrNotFound is an alias for exec.ErrNotFound, the error resulting
+// if a path search failed to find an executable file.
+var ErrNotFound = exec.ErrNotFound
+
+// LookPath is an alias for exec.LookPath, searches for an executable
+// named file in the directories named by the PATH environment
+// variable. Refer to that package for additional information.
+var LookPath = exec.LookPath
