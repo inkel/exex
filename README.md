@@ -6,6 +6,7 @@ The standard library `exec` package contains a very useful API to execute comman
 
 Another issue with the standard library package is that if we use `exec.Cmd.Output` to only capture the error we will be incurring in unnecessary allocations because it uses a `bytes.Buffer` for capturing STDOUT, and also STDERR will be truncated. The wrappers defined in this library do not have this peformance penalization nor truncate any output.
 
+In order to avoid importing both this package and `os/exec`, this package provides aliases for the variables and top-level functions `os/exec` provides.
 
 ## Benchmarks
 
