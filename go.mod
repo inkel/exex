@@ -1,3 +1,3 @@
-module github.com/inkel/exex
+module exex
 
-go 1.17
+go 1.18

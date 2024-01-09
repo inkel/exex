@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"exex"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"testing"
-
-	"github.com/inkel/exex"
 )
 
 const stderrMessage = "Yup, I'm broken"

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/inkel/exex"
+	"exex"
 )
 
 func ExampleCommand() {
