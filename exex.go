@@ -153,6 +153,8 @@ func RunContext(ctx context.Context, cmd string, args ...string) error {
 	return CommandContext(ctx, cmd, args...).Run()
 }
 
+// CommandError returns the error with the stderr log appended,
+// if the error is a command exit error, and the stderr log exists.
 func CommandError(err error, errMsg string) error {
 	var exErr *ExitError
 	if err != nil {
