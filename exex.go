@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os/exec"
 )
@@ -150,6 +151,20 @@ func Run(cmd string, args ...string) error {
 // result of executing *Cmd.Run.
 func RunContext(ctx context.Context, cmd string, args ...string) error {
 	return CommandContext(ctx, cmd, args...).Run()
+}
+
+func AppendStderr(err error, errMsg string) error {
+	var exErr *ExitError
+	if err != nil {
+		if !errors.As(err, &exErr) {
+			return fmt.Errorf("error converting error to exex.ExitError")
+		}
+		if exErr.Stderr == nil {
+			return fmt.Errorf("%s (%w)", errMsg, err)
+		}
+		return fmt.Errorf("%s (%w)\n%s", errMsg, err, exErr.Stderr)
+	}
+	return nil
 }
 
 // Error is a type alias for exec.Error
