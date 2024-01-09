@@ -153,7 +153,7 @@ func RunContext(ctx context.Context, cmd string, args ...string) error {
 	return CommandContext(ctx, cmd, args...).Run()
 }
 
-func AppendStderr(err error, errMsg string) error {
+func CommandError(err error, errMsg string) error {
 	var exErr *ExitError
 	if err != nil {
 		if !errors.As(err, &exErr) {
