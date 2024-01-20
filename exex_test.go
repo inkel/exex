@@ -71,9 +71,7 @@ func TestRunContext(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
 		defer func() {
 			r := recover()
-			if r == nil {
-				t.Fatal("expecting error")
-			}
+			assert.NotNil(t, r)
 			if r != "nil Context" {
 				t.Fatalf("expecting nil context error, got %q", r)
 			}
@@ -120,22 +118,12 @@ func TestRunCommand(t *testing.T) {
 		cmd := exec.Command(os.Args[0], "capture", "stderr")
 		cmd.Stderr = &stderr
 		err := exex.RunCommand(cmd)
-		if err == nil {
-			t.Fatal("expecting error")
-		}
-
+		assert.Error(t, err)
 		exErr, ok := err.(*exec.ExitError)
-		if !ok {
-			t.Fatalf("expecting *exec.ExitError, got %T", err)
-		}
-		if exErr.Stderr != nil {
-			t.Errorf("expecting not captured stderr, got %q", exErr.Stderr)
-		}
-
+		assert.Equals(t, ok, true)
+		assert.Nil(t, exErr.Stderr)
 		exp := "error: capture stderr"
-		if got := stderr.String(); got != exp {
-			t.Errorf("expecting %q, got %q", exp, got)
-		}
+		assert.Equals(t, stderr.String(), exp)
 	})
 }
 
