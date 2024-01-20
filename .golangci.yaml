@@ -69,6 +69,9 @@ linters:
     # Enforce tests being in the _test package.
     - testpackage
 
+    - stylecheck
+    - lll
+
     # endregion
 linters-settings:
   depguard:

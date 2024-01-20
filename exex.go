@@ -1,6 +1,6 @@
-// exex provides a custom Cmd type that wraps exec.Cmd in a way that
-// it will always capture standard error stream if execution fails
-// with an exec.ExitError.
+// Package exex provides a custom Cmd type that wraps exec.Cmd in a
+// way that it will always capture standard error stream if execution
+// fails with an exec.ExitError.
 //
 // The standard library exec package contains a very useful API to
 // execute commands, however, the exec.Cmd.Run and exec.Cmd.Output
