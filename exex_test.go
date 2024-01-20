@@ -81,7 +81,6 @@ func TestRunContext(t *testing.T) {
 }
 
 func TestCmd_RunCapture(t *testing.T) {
-	fmt.Printf("%v\n", os.Args[0])
 	cmd := exec.Command(os.Args[0], "capture", "stderr")
 	err := exex.RunCommand(cmd)
 	assertErr(t, err, "error: capture stderr")
