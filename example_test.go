@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"exex"
+	"go.arcalot.io/exex"
 )
 
 func ExampleCommand() {
