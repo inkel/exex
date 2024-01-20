@@ -25,11 +25,11 @@ func TestMain(m *testing.M) {
 			os.Exit(1)
 		}
 		for _, m := range os.Args[1:] {
-			_, err := fmt.Fprint(os.Stderr, " ", m)
-			if err != nil {
-				logger.Errorf("main failed to print to stderr %v", err)
+			_, err2 := fmt.Fprint(os.Stderr, " ", m)
+			if err2 != nil {
+				logger.Errorf("main failed to print to stderr %v", err2)
+				os.Exit(1)
 			}
-			os.Exit(1)
 		}
 		os.Exit(1)
 	}
@@ -49,21 +49,10 @@ func TestMain(m *testing.M) {
 }
 
 func assertErr(t *testing.T, err error, msg string) {
-
-	if err == nil {
-		t.Fatal("expecting an error")
-	}
-	//assert.Error(t, err)
-
+	assert.Error(t, err)
 	var exErr *exec.ExitError
-	if !errors.As(err, &exErr) {
-		t.Fatalf("expecting *exec.ExitError, got %T", err)
-	}
-	//assert.Equals(t, errors.As(err, &exErr), true)
-	//assert.Contains(t, string(exErr.Stderr), msg)
-	if string(exErr.Stderr) != msg {
-		t.Fatalf("expecting %q, got %q", msg, exErr.Stderr)
-	}
+	assert.Equals(t, errors.As(err, &exErr), true)
+	assert.Contains(t, string(exErr.Stderr), msg)
 }
 
 func TestRun(t *testing.T) {
@@ -110,6 +99,13 @@ func TestRunContext(t *testing.T) {
 			t.Fatalf("expecting %v, got %v", ctx.Err(), err)
 		}
 	})
+}
+
+func TestCmd_RunCapture(t *testing.T) {
+	fmt.Printf("%v\n", os.Args[0])
+	cmd := exec.Command(os.Args[0], "capture", "stderr")
+	err := exex.RunCommand(cmd)
+	assertErr(t, err, "error: capture stderr")
 }
 
 func TestRunCommand(t *testing.T) {
