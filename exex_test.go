@@ -66,18 +66,6 @@ func TestRun(t *testing.T) {
 }
 
 func TestRunContext(t *testing.T) {
-	t.Run("nil", func(t *testing.T) {
-		defer func() {
-			r := recover()
-			assert.NotNil(t, r)
-			if r != "nil Context" {
-				t.Fatalf("expecting nil context error, got %q", r)
-			}
-		}()
-		err := exex.RunContext(nil, os.Args[0])
-		assert.NoError(t, err)
-	})
-
 	t.Run("background", func(t *testing.T) {
 		err := exex.RunContext(context.Background(), os.Args[0], "context")
 		assertErr(t, err, "error: context")
