@@ -1,0 +1,69 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  golangci-lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.52.2
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.18
+
+      - name: Set up gotestfmt
+        uses: gotesttools/gotestfmt-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up limgo
+        uses: GoTestTools/limgo-action@v1.0.1
+        with:
+          version: "v1.0.0"
+          install-only: true
+
+      - name: run tests
+        run: |
+          set -euo pipefail
+          go test -coverprofile=test.cov -json -v ./... 2>&1 | tee /tmp/gotest.log | gotestfmt
+
+      - name: upload test log
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-log
+          path: /tmp/gotest.log
+          if-no-files-found: error
+
+      - name: Calculate test coverage
+        run: |
+          cat .limgo.json
+          limgo -coverfile=test.cov -config=.limgo.json -outfmt=md -outfile=limgo_cov.md
+          cat limgo_cov.md >> $GITHUB_STEP_SUMMARY
+
+      - name: upload coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: limgo_cov.md
+          if-no-files-found: error
