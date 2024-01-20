@@ -76,7 +76,6 @@ func TestRunContext(t *testing.T) {
 				t.Fatalf("expecting nil context error, got %q", r)
 			}
 		}()
-
 		err := exex.RunContext(nil, os.Args[0])
 		assert.NoError(t, err)
 	})
@@ -90,12 +89,8 @@ func TestRunContext(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 		err := exex.RunContext(ctx, os.Args[0], "context cancelled")
-		if err == nil {
-			t.Fatal("expecting error")
-		}
-		if ctx.Err() != err {
-			t.Fatalf("expecting %v, got %v", ctx.Err(), err)
-		}
+		assert.Error(t, err)
+		assert.Equals(t, ctx.Err(), err)
 	})
 }
 
@@ -210,22 +205,12 @@ func TestCmd_Run(t *testing.T) {
 		cmd := exex.Command(os.Args[0], "capture", "stderr")
 		cmd.Stderr = &stderr
 		err := cmd.Run()
-		if err == nil {
-			t.Fatal("expecting error")
-		}
-
+		assert.Error(t, err)
 		exErr, ok := err.(*exec.ExitError)
-		if !ok {
-			t.Fatalf("expecting *exec.ExitError, got %T", err)
-		}
-		if exErr.Stderr != nil {
-			t.Errorf("expecting not captured stderr, got %q", exErr.Stderr)
-		}
-
+		assert.Equals(t, ok, true)
+		assert.Nil(t, exErr.Stderr)
 		exp := "error: capture stderr"
-		if got := stderr.String(); got != exp {
-			t.Errorf("expecting %q, got %q", exp, got)
-		}
+		assert.Equals(t, stderr.String(), exp)
 	})
 }
 
