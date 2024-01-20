@@ -55,49 +55,63 @@ func assertErr(t *testing.T, err error, msg string) {
 
 func TestRun(t *testing.T) {
 	t.Run("command", func(t *testing.T) {
-		err := exex.Run(os.Args[0])
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		err = exex.Run(pathExe)
 		assertErr(t, err, "error:")
 	})
 
 	t.Run("command+args", func(t *testing.T) {
-		err := exex.Run(os.Args[0], "foo", "bar")
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		err = exex.Run(pathExe, "foo", "bar")
 		assertErr(t, err, "error: foo bar")
 	})
 }
 
 func TestRunContext(t *testing.T) {
 	t.Run("background", func(t *testing.T) {
-		err := exex.RunContext(context.Background(), os.Args[0], "context")
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		err = exex.RunContext(context.Background(), pathExe, "context")
 		assertErr(t, err, "error: context")
 	})
 
 	t.Run("cancelled", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
-		err := exex.RunContext(ctx, os.Args[0], "context cancelled")
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		err = exex.RunContext(ctx, pathExe, "context cancelled")
 		assert.Error(t, err)
 		assert.Equals(t, ctx.Err(), err)
 	})
 }
 
 func TestCmd_RunCapture(t *testing.T) {
-	cmd := exec.Command(os.Args[0], "capture", "stderr")
-	err := exex.RunCommand(cmd)
+	pathExe, err := os.Executable()
+	assert.NoError(t, err)
+	cmd := exec.Command(pathExe, "capture", "stderr")
+	err = exex.RunCommand(cmd)
 	assertErr(t, err, "error: capture stderr")
 }
 
 func TestRunCommand(t *testing.T) {
 	t.Run("capture", func(t *testing.T) {
-		cmd := exec.Command(os.Args[0], "capture", "stderr")
-		err := exex.RunCommand(cmd)
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		cmd := exec.Command(pathExe, "capture", "stderr")
+		err = exex.RunCommand(cmd)
 		assertErr(t, err, "error: capture stderr")
 	})
 
 	t.Run("custom stderr", func(t *testing.T) {
 		var stderr bytes.Buffer
-		cmd := exec.Command(os.Args[0], "capture", "stderr")
+		pathExe, err := os.Executable()
+		assert.NoError(t, err)
+		cmd := exec.Command(pathExe, "capture", "stderr")
 		cmd.Stderr = &stderr
-		err := exex.RunCommand(cmd)
+		err = exex.RunCommand(cmd)
 		assert.Error(t, err)
 		var exErr *exec.ExitError
 		assert.Equals(t, errors.As(err, &exErr), true)
