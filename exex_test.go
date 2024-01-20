@@ -14,8 +14,6 @@ import (
 	"testing"
 )
 
-const stderrMessage = "Yup, I'm broken"
-
 func TestMain(m *testing.M) {
 	logger := log.NewLogger(log.LevelDebug, log.NewBufferWriter())
 	if o := os.Getenv("TEST_MAIN"); o != "" {
@@ -114,8 +112,8 @@ func TestRunCommand(t *testing.T) {
 		cmd.Stderr = &stderr
 		err := exex.RunCommand(cmd)
 		assert.Error(t, err)
-		exErr, ok := err.(*exec.ExitError)
-		assert.Equals(t, ok, true)
+		var exErr *exec.ExitError
+		assert.Equals(t, errors.As(err, &exErr), true)
 		assert.Nil(t, exErr.Stderr)
 		exp := "error: capture stderr"
 		assert.Equals(t, stderr.String(), exp)
@@ -131,7 +129,8 @@ func benchmarkCaptureStderrStdlib(b *testing.B) {
 		cmd := exec.Command(os.Args[0])
 		cmd.Env = []string{"TEST_MAIN=error"}
 		_, err := cmd.Output()
-		exErr = err.(*exec.ExitError)
+		// expect to be true
+		_ = errors.As(err, &exErr)
 	}
 
 	Stderr = exErr.Stderr
@@ -144,7 +143,8 @@ func benchmarkCaptureStderrExex(b *testing.B) {
 		cmd := exec.Command(os.Args[0])
 		cmd.Env = []string{"TEST_MAIN=error"}
 		err := exex.RunCommand(cmd)
-		exErr = err.(*exec.ExitError)
+		// expect to be true
+		_ = errors.As(err, &exErr)
 	}
 
 	Stderr = exErr.Stderr
@@ -166,7 +166,9 @@ func BenchmarkRun(b *testing.B) {
 	var exErr *exec.ExitError
 
 	for i := 0; i < b.N; i++ {
-		exErr = exex.Run(os.Args[0]).(*exec.ExitError)
+		err := exex.Run(os.Args[0])
+		// expect to be true
+		_ = errors.As(err, &exErr)
 	}
 
 	Stderr = exErr.Stderr
@@ -178,7 +180,9 @@ func BenchmarkRunContext(b *testing.B) {
 	var exErr *exec.ExitError
 
 	for i := 0; i < b.N; i++ {
-		exErr = exex.RunContext(ctx, os.Args[0]).(*exec.ExitError)
+		err := exex.RunContext(ctx, os.Args[0])
+		// expect to be true
+		_ = errors.As(err, &exErr)
 	}
 
 	Stderr = exErr.Stderr
@@ -188,7 +192,9 @@ func BenchmarkRunCommand(b *testing.B) {
 	var exErr *exec.ExitError
 
 	for i := 0; i < b.N; i++ {
-		exErr = exex.RunCommand(exec.Command(os.Args[0])).(*exec.ExitError)
+		err := exex.RunCommand(exec.Command(os.Args[0]))
+		// expect to be true
+		_ = errors.As(err, &exErr)
 	}
 
 	Stderr = exErr.Stderr
@@ -206,8 +212,8 @@ func TestCmd_Run(t *testing.T) {
 		cmd.Stderr = &stderr
 		err := cmd.Run()
 		assert.Error(t, err)
-		exErr, ok := err.(*exec.ExitError)
-		assert.Equals(t, ok, true)
+		var exErr *exec.ExitError
+		assert.Equals(t, errors.As(err, &exErr), true)
 		assert.Nil(t, exErr.Stderr)
 		exp := "error: capture stderr"
 		assert.Equals(t, stderr.String(), exp)
@@ -219,8 +225,8 @@ func TestLookPathNotFound(t *testing.T) {
 	foundPath, err := exex.LookPath(nonExistentPath)
 	assert.Error(t, err)
 	assert.Equals(t, foundPath, "")
-	_, ok := err.(*exex.Error)
-	assert.Equals(t, ok, true)
+	var exErr *exex.Error
+	assert.Equals(t, errors.As(err, &exErr), true)
 }
 
 func TestLookPathFound(t *testing.T) {
