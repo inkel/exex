@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.arcalot.io/assert"
 	"go.arcalot.io/exex"
 	"os"
 	"os/exec"
@@ -32,6 +33,7 @@ func TestMain(m *testing.M) {
 }
 
 func assertErr(t *testing.T, err error, msg string) {
+
 	if err == nil {
 		t.Fatal("expecting an error")
 	}
@@ -225,32 +227,18 @@ func TestCmd_Run(t *testing.T) {
 }
 
 func TestLookPathNotFound(t *testing.T) {
-	nonExistingPath := "foobarbazquux"
-
-	path, err := exex.LookPath(nonExistingPath)
-	if err == nil {
-		t.Fatalf("LookPath found %q in $PATH: %v", nonExistingPath, path)
-	}
-	if path != "" {
-		t.Fatalf("LookPath returned %q with a non-nil error: %v", path, err)
-	}
-
-	if _, ok := err.(*exex.Error); !ok {
-		t.Fatal("LookPath error is not an exex.Error")
-	}
-	if _, ok := err.(*exec.Error); !ok {
-		t.Fatal("LookPath error is not an exex.Error")
-	}
+	nonExistentPath := "foobarbazquux"
+	foundPath, err := exex.LookPath(nonExistentPath)
+	assert.Error(t, err)
+	assert.Equals(t, foundPath, "")
+	_, ok := err.(*exex.Error)
+	assert.Equals(t, ok, true)
 }
 
 func TestLookPathFound(t *testing.T) {
 	bin := os.Args[0]
-	os.Setenv("PATH", path.Dir(bin))
-	path, err := exex.LookPath(path.Base(bin))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if path != bin {
-		t.Fatalf("expecting %q, got %q", bin, path)
-	}
+	t.Setenv("PATH", path.Dir(bin))
+	binpath, err := exex.LookPath(path.Base(bin))
+	assert.NoError(t, err)
+	assert.Equals(t, binpath, bin)
 }
