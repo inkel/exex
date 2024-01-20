@@ -53,12 +53,14 @@ func assertErr(t *testing.T, err error, msg string) {
 	if err == nil {
 		t.Fatal("expecting an error")
 	}
+	//assert.Error(t, err)
 
 	var exErr *exec.ExitError
 	if !errors.As(err, &exErr) {
 		t.Fatalf("expecting *exec.ExitError, got %T", err)
 	}
-
+	//assert.Equals(t, errors.As(err, &exErr), true)
+	//assert.Contains(t, string(exErr.Stderr), msg)
 	if string(exErr.Stderr) != msg {
 		t.Fatalf("expecting %q, got %q", msg, exErr.Stderr)
 	}
@@ -88,7 +90,8 @@ func TestRunContext(t *testing.T) {
 			}
 		}()
 
-		exex.RunContext(nil, os.Args[0])
+		err := exex.RunContext(nil, os.Args[0])
+		assert.NoError(t, err)
 	})
 
 	t.Run("background", func(t *testing.T) {
