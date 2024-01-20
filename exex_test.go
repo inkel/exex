@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"go.arcalot.io/assert"
 	"go.arcalot.io/exex"
+	"go.arcalot.io/log/v2"
 	"os"
 	"os/exec"
 	"path"
@@ -16,19 +17,34 @@ import (
 const stderrMessage = "Yup, I'm broken"
 
 func TestMain(m *testing.M) {
+	logger := log.NewLogger(log.LevelDebug, log.NewBufferWriter())
 	if o := os.Getenv("TEST_MAIN"); o != "" {
-		fmt.Fprint(os.Stderr, "error:")
+		_, err := fmt.Fprint(os.Stderr, "error:")
+		if err != nil {
+			logger.Errorf("main failed to print to stderr %v", err)
+			os.Exit(1)
+		}
 		for _, m := range os.Args[1:] {
-			fmt.Fprint(os.Stderr, " ", m)
+			_, err := fmt.Fprint(os.Stderr, " ", m)
+			if err != nil {
+				logger.Errorf("main failed to print to stderr %v", err)
+			}
+			os.Exit(1)
 		}
 		os.Exit(1)
 	}
 
 	bench := os.Getenv("BENCHMARK")
 	os.Clearenv()
-	os.Setenv("TEST_MAIN", "error")
-	os.Setenv("BENCHMARK", bench)
-
+	err := os.Setenv("TEST_MAIN", "error")
+	if err != nil {
+		logger.Errorf("error setting TEST_MAIN in system environment %v", err)
+		os.Exit(1)
+	}
+	err = os.Setenv("BENCHMARK", bench)
+	if err != nil {
+		logger.Errorf("error setting BENCHMARK in system environment %v", err)
+	}
 	os.Exit(m.Run())
 }
 
