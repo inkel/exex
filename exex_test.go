@@ -116,8 +116,6 @@ func TestRunCommand(t *testing.T) {
 	})
 }
 
-var Stderr []byte
-
 func TestCmd_Run(t *testing.T) {
 	t.Run("capture", func(t *testing.T) {
 		err := exex.Command(os.Args[0], "capture", "stderr").Run()
