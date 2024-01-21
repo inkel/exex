@@ -32,16 +32,11 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	bench := os.Getenv("BENCHMARK")
 	os.Clearenv()
 	err := os.Setenv("TEST_MAIN", "error")
 	if err != nil {
 		logger.Errorf("error setting TEST_MAIN in system environment %v", err)
 		os.Exit(1)
-	}
-	err = os.Setenv("BENCHMARK", bench)
-	if err != nil {
-		logger.Errorf("error setting BENCHMARK in system environment %v", err)
 	}
 	os.Exit(m.Run())
 }
@@ -122,84 +117,6 @@ func TestRunCommand(t *testing.T) {
 }
 
 var Stderr []byte
-
-func benchmarkCaptureStderrStdlib(b *testing.B) {
-	var exErr *exec.ExitError
-
-	for i := 0; i < b.N; i++ {
-		cmd := exec.Command(os.Args[0])
-		cmd.Env = []string{"TEST_MAIN=error"}
-		_, err := cmd.Output()
-		// expect to be true
-		_ = errors.As(err, &exErr)
-	}
-
-	Stderr = exErr.Stderr
-}
-
-func benchmarkCaptureStderrExex(b *testing.B) {
-	var exErr *exec.ExitError
-
-	for i := 0; i < b.N; i++ {
-		cmd := exec.Command(os.Args[0])
-		cmd.Env = []string{"TEST_MAIN=error"}
-		err := exex.RunCommand(cmd)
-		// expect to be true
-		_ = errors.As(err, &exErr)
-	}
-
-	Stderr = exErr.Stderr
-}
-
-func BenchmarkCaptureStderr(b *testing.B) {
-	switch os.Getenv("BENCHMARK") {
-	case "stdlib":
-		benchmarkCaptureStderrStdlib(b)
-	case "exex":
-		benchmarkCaptureStderrExex(b)
-	default:
-		b.Run("stdlib", benchmarkCaptureStderrStdlib)
-		b.Run("exex", benchmarkCaptureStderrExex)
-	}
-}
-
-func BenchmarkRun(b *testing.B) {
-	var exErr *exec.ExitError
-
-	for i := 0; i < b.N; i++ {
-		err := exex.Run(os.Args[0])
-		// expect to be true
-		_ = errors.As(err, &exErr)
-	}
-
-	Stderr = exErr.Stderr
-}
-
-func BenchmarkRunContext(b *testing.B) {
-	ctx := context.Background()
-
-	var exErr *exec.ExitError
-
-	for i := 0; i < b.N; i++ {
-		err := exex.RunContext(ctx, os.Args[0])
-		// expect to be true
-		_ = errors.As(err, &exErr)
-	}
-
-	Stderr = exErr.Stderr
-}
-
-func BenchmarkRunCommand(b *testing.B) {
-	var exErr *exec.ExitError
-
-	for i := 0; i < b.N; i++ {
-		err := exex.RunCommand(exec.Command(os.Args[0]))
-		// expect to be true
-		_ = errors.As(err, &exErr)
-	}
-
-	Stderr = exErr.Stderr
-}
 
 func TestCmd_Run(t *testing.T) {
 	t.Run("capture", func(t *testing.T) {
