@@ -84,10 +84,10 @@ func TestRunContext(t *testing.T) {
 }
 
 func TestCmd_RunCapture(t *testing.T) {
-	//pathExe, err := os.Executable()
-	//assert.NoError(t, err)
-	cmd := exec.Command(os.Args[0], "capture", "stderr")
-	err := exex.RunCommand(cmd)
+	pathExe, err := os.Executable()
+	assert.NoError(t, err)
+	cmd := exec.Command(pathExe, "capture", "stderr") //nolint:gosec
+	err = exex.RunCommand(cmd)
 	assertErr(t, err, "error: capture stderr")
 }
 
@@ -95,7 +95,7 @@ func TestRunCommand(t *testing.T) {
 	t.Run("capture", func(t *testing.T) {
 		pathExe, err := os.Executable()
 		assert.NoError(t, err)
-		cmd := exec.Command(pathExe, "capture", "stderr")
+		cmd := exec.Command(pathExe, "capture", "stderr") //nolint:gosec
 		err = exex.RunCommand(cmd)
 		assertErr(t, err, "error: capture stderr")
 	})
@@ -104,7 +104,7 @@ func TestRunCommand(t *testing.T) {
 		var stderr bytes.Buffer
 		pathExe, err := os.Executable()
 		assert.NoError(t, err)
-		cmd := exec.Command(pathExe, "capture", "stderr")
+		cmd := exec.Command(pathExe, "capture", "stderr") //nolint:gosec
 		cmd.Stderr = &stderr
 		err = exex.RunCommand(cmd)
 		assert.Error(t, err)
